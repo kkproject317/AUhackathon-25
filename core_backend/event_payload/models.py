@@ -11,10 +11,6 @@ class SecurityEvent(models.Model):
     timestamp = models.DateTimeField() #**
 
     # --- Asset (What is being protected) ---
-
-    asset_id = models.CharField(
-        max_length=20
-    ) #**
     asset_type = models.CharField(
         max_length=50,
         choices=[
@@ -70,12 +66,12 @@ class SecurityEvent(models.Model):
     geo_lat = models.FloatField()
     geo_long = models.FloatField()
 
-    geo_distance_from_baseline_km = models.FloatField()
+    geo_distance_from_baseline_km = models.FloatField(null=True, blank=True)
 
     # --- Farm Location (Asset baseline) ---
     farm_id = models.CharField(max_length=20, null=True)
-    farm_lat = models.FloatField()
-    farm_long = models.FloatField()
+    farm_lat = models.FloatField(null=True, blank=True)
+    farm_long = models.FloatField(null=True, blank=True)
 
     # --- Agri Telemetry (Optional per event) ---
     soil_moisture_percent = models.FloatField(null=True, blank=True)

@@ -5,7 +5,7 @@ from .serializers import SecurityEventCreateSerializer
 
 @api_view(['POST'])
 def create_security_event(request):
-    serializer = SecurityEventCreateSerializer(data=request.data)
+    serializer = SecurityEventCreateSerializer( data=request.data, partial=True)
 
     if serializer.is_valid():
         event = serializer.save()
