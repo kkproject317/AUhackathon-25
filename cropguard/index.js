@@ -364,7 +364,7 @@
     // ============================================
     
     angular.module('cropGuardApp')
-        .controller('LoginController', ['$location', 'AuthService', function($location, AuthService) {
+        .controller('LoginController', ['$location', 'AuthService', '$http', function($location, AuthService, $http) {
             var vm = this;
             if (AuthService.isAuthenticated()) { $location.path('/dashboard/home'); return; }
 
@@ -373,15 +373,154 @@
             vm.error = '';
             vm.isLoading = false;
 
+            // Helper function to get device type
+            function getDeviceType() {
+                var ua = navigator.userAgent;
+                if (/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(ua)) {
+                    return "Tablet";
+                }
+                if (/Mobile|Android|iP(hone|od)|IEMobile|BlackBerry|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/.test(ua)) {
+                    return "Mobile";
+                }
+                return "Desktop";
+            }
+
+            // Helper function to get device OS
+            function getDeviceOS() {
+                var userAgent = navigator.userAgent;
+                var platform = navigator.platform;
+                var os = 'Unknown';
+                
+                if (/Win/i.test(platform)) {
+                    os = 'Windows';
+                } else if (/Mac/i.test(platform)) {
+                    os = 'MacOS';
+                } else if (/Linux/i.test(platform)) {
+                    os = 'Linux';
+                } else if (/Android/i.test(userAgent)) {
+                    os = 'Android';
+                } else if (/iOS|iPhone|iPad|iPod/.test(userAgent)) {
+                    os = 'iOS';
+                }
+                
+                return os;
+            }
+
+            // Helper function to get IP address
+            function getIPAddress() {
+                return fetch('https://api.ipify.org?format=json')
+                    .then(function(response) { return response.json(); })
+                    .then(function(data) { return data.ip; })
+                    .catch(function(error) {
+                        console.error('Error getting IP:', error);
+                        return 'unavailable';
+                    });
+            }
+
+            // Helper function to get geolocation
+            function getGeolocation() {
+                return new Promise(function(resolve, reject) {
+                    if (!navigator.geolocation) {
+                        resolve({ latitude: null, longitude: null });
+                        return;
+                    }
+                    
+                    navigator.geolocation.getCurrentPosition(
+                        function(position) {
+                            resolve({
+                                latitude: position.coords.latitude,
+                                longitude: position.coords.longitude
+                            });
+                        },
+                        function(error) {
+                            // Silently handle geolocation errors (user may have denied permission)
+                            // Error codes: 1=PERMISSION_DENIED, 2=POSITION_UNAVAILABLE, 3=TIMEOUT
+                            if (error.code !== 1) { // Only log if not permission denied (expected)
+                                console.warn('Geolocation unavailable:', error.message || 'Location services unavailable');
+                            }
+                            resolve({ latitude: null, longitude: null });
+                        },
+                        {
+                            enableHighAccuracy: false, // Less strict for better compatibility
+                            timeout: 3000, // Shorter timeout
+                            maximumAge: 60000 // Accept cached location up to 1 minute old
+                        }
+                    );
+                });
+            }
+
             vm.login = function() {
                 vm.error = '';
                 if (!vm.email || !vm.password) { vm.error = 'Please enter both email and password'; return; }
                 vm.isLoading = true;
 
-                AuthService.login(vm.email, vm.password)
-                    .then(function() { $location.path('/dashboard/home'); })
-                    .catch(function(error) { vm.error = error.message || 'Invalid credentials'; })
-                    .finally(function() { vm.isLoading = false; });
+                // Collect all required data for API payload
+                var deviceType = getDeviceType();
+                var deviceOS = getDeviceOS();
+                var timestamp = new Date().toISOString();
+                
+                // Get IP address and geolocation asynchronously
+                Promise.all([getIPAddress(), getGeolocation()])
+                    .then(function(results) {
+                        var ipAddress = results[0];
+                        var geoLocation = results[1];
+                        
+                        // Create payload
+                        var payload = {
+                            userID: vm.email,
+                            password: vm.password,
+                            timestamp: timestamp,
+                            ipAddress: ipAddress,
+                            longitude: geoLocation.longitude,
+                            latitude: geoLocation.latitude,
+                            deviceOS: deviceOS,
+                            deviceType: deviceType
+                        };
+                        
+                        console.log('Login Payload:', payload);
+                        
+                        // Send to API (commented out for testing)
+                        // $http.post('/api/login', payload)
+                        //     .then(function(response) {
+                        //         console.log('API Response:', response.data);
+                        //         // Continue with authentication after API call
+                        //         return AuthService.login(vm.email, vm.password);
+                        //     })
+                        //     .catch(function(error) {
+                        //         console.error('API Error:', error);
+                        //         // Even if API fails, continue with local authentication
+                        //         return AuthService.login(vm.email, vm.password);
+                        //     })
+                        //     .then(function() { 
+                        //         $location.path('/dashboard/home'); 
+                        //     })
+                        //     .catch(function(error) { 
+                        //         vm.error = error.message || 'Invalid credentials'; 
+                        //     })
+                        //     .finally(function() { 
+                        //         vm.isLoading = false; 
+                        //     });
+                        
+                        // Continue with authentication (without API call for now)
+                        AuthService.login(vm.email, vm.password)
+                            .then(function() { 
+                                $location.path('/dashboard/home'); 
+                            })
+                            .catch(function(error) { 
+                                vm.error = error.message || 'Invalid credentials'; 
+                            })
+                            .finally(function() { 
+                                vm.isLoading = false; 
+                            });
+                    })
+                    .catch(function(error) {
+                        console.error('Error collecting login data:', error);
+                        // If data collection fails, still try to authenticate
+                        AuthService.login(vm.email, vm.password)
+                            .then(function() { $location.path('/dashboard/home'); })
+                            .catch(function(err) { vm.error = err.message || 'Invalid credentials'; })
+                            .finally(function() { vm.isLoading = false; });
+                    });
             };
 
             vm.goBack = function() { $location.path('/'); };
