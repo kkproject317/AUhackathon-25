@@ -24,7 +24,7 @@ def create_farm(request):
 
 @api_view(['GET'])
 def get_farms_by_user(request):
-    user_id = request.data.get("user_id")
+    user_id = request.query_params.get("user_id")
 
     if not user_id:
         return Response(

@@ -10,7 +10,7 @@
     // MOCK DATA (Based on API responses)
     // ============================================
     // Set USE_MOCK_DATA to true to use mock data, false to use real API
-    const USE_MOCK_DATA = true;
+    const USE_MOCK_DATA = false;
     
     var MOCK_DATA = {
     //     user: {
@@ -276,21 +276,42 @@ angular.module('cropGuardApp')
     }
 
     return {
-        login: function (email, password) {
-            // Validate credentials
-            if (email === 'nidhipatel2005@gmail.com' && password === 'nidhi12345') {
+        login: function (userId, password) {
+
+            // Mock users (replace later with backend auth)
+            const USERS = {
+                'FARMER_001': {
+                    password: 'ramesh@123',
+                    name: 'Ramesh Patel',
+                    role: 'Farmer'
+                },
+                'ADMIN_001': {
+                    password: 'admin@123',
+                    name: 'Admin User',
+                    role: 'Admin'
+                }
+            };
+        
+            const user = USERS[userId];
+        
+            if (user && user.password === password) {
                 currentUser = {
-                    id: 'FARMER_001',
-                    name: 'Nidhi Patel',
-                    email: email,
-                    role: 'Farmer',
+                    id: userId,          // ✅ THIS IS KEY
+                    name: user.name,
+                    email: userId,       // keep field for compatibility
+                    role: user.role,
                     created_at: new Date().toISOString()
                 };
-                // Save to localStorage
-                $window.localStorage.setItem('cropGuardUser', JSON.stringify(currentUser));
+        
+                $window.localStorage.setItem(
+                    'cropGuardUser',
+                    JSON.stringify(currentUser)
+                );
+        
                 return $q.resolve(currentUser);
             }
-            return $q.reject({ message: 'Invalid email or password' });
+        
+            return $q.reject({ message: 'Invalid credentials' });
         },
         
 
@@ -316,10 +337,28 @@ angular.module('cropGuardApp')
     // ============================================
     
     angular.module('cropGuardApp')
-.factory('DataService', ['$http', '$q', function($http, $q) {
+.factory('DataService', ['$http', '$q', function ($http, $q) {
 
     const BASE_URL = 'http://127.0.0.1:8000';
-    const USER_ID = 'FARMER_001'; // hardcoded for now (matches your backend)
+    const USER_ID = 'FARMER_001'; // current logged-in user
+    const USE_MOCK = typeof USE_MOCK_DATA !== 'undefined' ? USE_MOCK_DATA : false;
+
+    /* ================= HELPERS ================= */
+
+    function normalizeType(type) {
+        switch (type) {
+            case 'soil_sensor': return 'Soil Sensor';
+            case 'weather_station': return 'Weather Station';
+            case 'irrigation_controller': return 'Controller';
+            case 'gateway': return 'Gateway';
+            default: return type;
+        }
+    }
+
+    function normalizePrediction(p) {
+        if (!p) return 'Normal';
+        return p.charAt(0).toUpperCase() + p.slice(1);
+    }
 
     function mapFarm(f) {
         return {
@@ -333,15 +372,17 @@ angular.module('cropGuardApp')
         };
     }
 
-    function mapDevice(a) {
-        // Find farm name from farms data
-        var farm = MOCK_DATA.farms.find(f => f.farm_id === a.farm_id);
+    function mapDevice(a, farmsCache) {
+        const farm = farmsCache
+            ? farmsCache.find(f => f.id === a.farm_id)
+            : null;
+
         return {
             id: a.asset_id,
             name: a.asset_name,
             type: normalizeType(a.asset_type),
             farm_id: a.farm_id,
-            farm_name: farm ? farm.farm_name : a.farm_id,
+            farm_name: farm ? farm.name : a.farm_id,
             os: a.asset_os,
             is_active: a.is_active,
             baseline_lat: a.baseline_lat,
@@ -351,130 +392,194 @@ angular.module('cropGuardApp')
             owner_user_id: a.owner_user_id
         };
     }
-
-    function normalizeType(type) {
-        switch (type) {
-            case 'soil_sensor': return 'Soil Sensor';
-            case 'weather_station': return 'Weather Station';
-            case 'irrigation_controller': return 'Controller';
-            case 'gateway': return 'Gateway';
-            default: return type;
+    function parseReason(reason) {
+        if (!reason) return 'N/A';
+    
+        if (typeof reason === 'string') {
+            try {
+                const parsed = JSON.parse(reason);
+                return parsed.reason || reason;
+            } catch (e) {
+                return reason;
+            }
         }
+    
+        if (typeof reason === 'object') {
+            return reason.reason || 'N/A';
+        }
+    
+        return 'N/A';
     }
+    
+
+    function mapRecord(r, devicesCache) {
+        // find device from devices list (already loaded)
+        let device = null;
+        if (devicesCache) {
+            device = devicesCache.find(d => d.id === r.device);
+        }
+    
+        return {
+            event_id: r.event_id,
+    
+            // 🔑 REQUIRED BY UI
+            device_id: r.device,
+            device_name: device ? device.name : r.device,
+            farm_name: device ? device.farm_name : 'Unknown Farm',
+    
+            // 🔑 MAP LOCATION
+            latitude: device ? device.baseline_lat : null,
+            longitude: device ? device.baseline_long : null,
+    
+            // 🔑 ML FIELDS
+            prediction: normalizePrediction(r.prediction),
+            anomaly_score: r.anomaly_score || 0,
+            confidence: r.confidence || r.anomaly_score || 0,
+            response_action: r.response_action || 'None',
+    
+            // 🔑 SECURITY CONTEXT
+            asset_type: r.asset_type,
+            action_type: r.action_type,
+            resource_type: r.resource_type,
+            authorization_status: r.authorization_status,
+    
+            // 🔑 FIX REASON (string only)
+            reason: parseReason(r.reason),
+    
+            processed_at: r.timestamp
+        };
+    }
+    
+    
+    /* ================= API ================= */
 
     return {
 
-        // ================= FARMS =================
+        /* -------- FARMS -------- */
+
         getFarms: function () {
-            if (USE_MOCK_DATA) {
-                // Use mock data
+            if (USE_MOCK) {
                 return $q.resolve(MOCK_DATA.farms.map(mapFarm));
-            } else {
-                // Use real API
-                return $http.post(`${BASE_URL}/farms/by-user/`, {
-                    user_id: USER_ID
-                }).then(res => res.data.farms.map(mapFarm));
             }
+
+            return $http.get(`${BASE_URL}/farms/by-user/`, {
+                params: { user_id: USER_ID }
+            }).then(res => res.data.farms.map(mapFarm));
         },
 
         getFarm: function (id) {
             return this.getFarms().then(farms =>
-                farms.find(f => f.id == id)
+                farms.find(f => f.id === id)
             );
         },
 
-        // ================= DEVICES =================
+        /* -------- DEVICES -------- */
+
         getDevices: function () {
-            if (USE_MOCK_DATA) {
-                // Use mock data
-                return $q.resolve(MOCK_DATA.assets.map(mapDevice));
-            } else {
-                // Use real API
-                return $http.post(`${BASE_URL}/assets/by-user/`, {
-                    user_id: USER_ID
-                }).then(res => res.data.assets.map(mapDevice));
+            if (USE_MOCK) {
+                return $q.resolve(MOCK_DATA.assets.map(a => mapDevice(a)));
             }
+
+            return this.getFarms().then(farms =>
+                $http.get(`${BASE_URL}/assets/by-user/`, {
+                    params: { user_id: USER_ID }
+                }).then(res =>
+                    res.data.assets.map(a => mapDevice(a, farms))
+                )
+            );
         },
 
         getDevice: function (id) {
             return this.getDevices().then(devices =>
-                devices.find(d => d.id == id)
+                devices.find(d => d.id === id)
             );
         },
 
         getDevicesByFarm: function (farmId) {
-            if (USE_MOCK_DATA) {
-                // Use mock data - filter by farm_id
-                return $q.resolve(MOCK_DATA.assets
-                    .filter(a => a.farm_id === farmId)
-                    .map(mapDevice));
-            } else {
-                // Use real API
-                return $http.post(`${BASE_URL}/assets/by-user-farm/`, {
-                    user_id: USER_ID,
-                    farm_id: farmId
-                }).then(res => res.data.assets.map(mapDevice));
+            if (USE_MOCK) {
+                return $q.resolve(
+                    MOCK_DATA.assets
+                        .filter(a => a.farm_id === farmId)
+                        .map(a => mapDevice(a))
+                );
             }
+
+            return this.getFarms().then(farms =>
+                $http.get(`${BASE_URL}/assets/by-user-farm/`, {
+                    params: {
+                        user_id: USER_ID,
+                        farm_id: farmId
+                    }
+                }).then(res =>
+                    res.data.assets.map(a => mapDevice(a, farms))
+                )
+            );
         },
 
-        // ================= RECORDS =================
+        /* -------- RECORDS (ML + Security) -------- */
+
         getRecords: function () {
-            return $q.resolve([]);
+            if (USE_MOCK) {
+                return $q.resolve([]);
+            }
+        
+            return this.getDevices().then(devices =>
+                $http.get(`${BASE_URL}/dashboard/security-event/`, {
+                    params: { user_id: USER_ID }
+                }).then(res =>
+                    res.data.results.map(r => mapRecord(r, devices))
+                )
+            );
+        },
+        
+        
+
+        /* -------- ANALYTICS -------- */
+
+        getDevicesData: function () {
+            if (USE_MOCK) {
+                return $q.resolve([
+                    { date: 'Jan 18', active: 30, inactive: 2 },
+                    { date: 'Jan 19', active: 32, inactive: 2 },
+                    { date: 'Jan 20', active: 36, inactive: 0 }
+                ]);
+            }
+
+            return this.getDevices().then(devices => {
+                const active = devices.filter(d => d.is_active).length;
+                const inactive = devices.length - active;
+                return [{ date: 'Today', active, inactive }];
+            });
         },
 
-        // ================= ANALYTICS HELPERS =================
-        getDevicesData: function() {
-            if (USE_MOCK_DATA) {
-                // Mock data for devices over time chart
-                var mockDevicesData = [
-                    { date: 'Jan 10', active: 2, inactive: 0 },
-                    { date: 'Jan 11', active: 3, inactive: 0 },
-                    { date: 'Jan 12', active: 4, inactive: 0 },
-                    { date: 'Jan 13', active: 5, inactive: 0 },
-                    { date: 'Jan 14', active: 6, inactive: 1 },
-                    { date: 'Jan 15', active: 6, inactive: 1 },
-                    { date: 'Jan 16', active: 7, inactive: 1 },
-                    { date: 'Jan 17', active: 8, inactive: 1 },
-                    { date: 'Jan 18', active: 7, inactive: 3 },
-                    { date: 'Jan 19', active: 7, inactive: 3 },
-                    { date: 'Jan 20', active: 36, inactive: 0 }
-                ];
-                return $q.resolve(mockDevicesData);
-            }
-            return $q.resolve([]);
-        },
-        getPredictionDistribution: function() {
-            if (USE_MOCK_DATA) {
-                // Mock data for prediction distribution
+        getPredictionDistribution: function () {
+            if (USE_MOCK) {
                 return $q.resolve({ normal: 30, suspicious: 4, anomaly: 2 });
             }
-            return $q.resolve({ normal: 0, suspicious: 0, anomaly: 0 });
+        
+            return this.getRecords().then(records => {
+                const dist = { normal: 0, suspicious: 0, anomaly: 0 };
+                records.forEach(r => {
+                    const k = (r.prediction || 'Normal').toLowerCase();
+                    if (dist[k] !== undefined) dist[k]++;
+                });
+                return dist;
+            });
         },
-        getRecordsData: () => $q.resolve([]),
-        getRecordsTimelineData: function() {
-            if (USE_MOCK_DATA) {
-                // Mock data for records anomaly score chart
-                var mockRecordsData = [
-                    { event: 'EVT-001', score: 0.12, prediction: 'Normal' },
-                    { event: 'EVT-002', score: 0.08, prediction: 'Normal' },
-                    { event: 'EVT-003', score: 0.45, prediction: 'Suspicious' },
-                    { event: 'EVT-004', score: 0.15, prediction: 'Normal' },
-                    { event: 'EVT-005', score: 0.78, prediction: 'Anomaly' },
-                    { event: 'EVT-006', score: 0.85, prediction: 'Anomaly' },
-                    { event: 'EVT-007', score: 0.10, prediction: 'Normal' },
-                    { event: 'EVT-008', score: 0.52, prediction: 'Suspicious' },
-                    { event: 'EVT-009', score: 0.91, prediction: 'Anomaly' },
-                    { event: 'EVT-010', score: 0.48, prediction: 'Suspicious' }
-                ];
-                return $q.resolve(mockRecordsData);
-            }
-            return $q.resolve([]);
-        },
-        getRecordsByDeviceType: () => $q.resolve({}),
-        getResponseActionsData: () => $q.resolve({}),
-        getAnomalyScoreByFarm: () => $q.resolve([]),
+        
 
-        // ================= MAP =================
+        getRecordsTimelineData: function () {
+            return this.getRecords().then(records =>
+                records.map(r => ({
+                    event: r.event_id,
+                    score: r.anomaly_score,
+                    prediction: r.prediction
+                }))
+            );
+        },
+
+        /* -------- MAP -------- */
+
         getMapEvents: function () {
             return this.getDevices().then(devices =>
                 devices.map(d => ({

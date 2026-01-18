@@ -26,8 +26,8 @@ def create_asset(request):
 @api_view(['GET'])
 def get_assets_by_user_and_farm(request):
 
-    owner_user_id = request.data.get("user_id")
-    farm_id = request.data.get("farm_id")
+    owner_user_id = request.query_params.get("user_id")
+    farm_id = request.query_params.get("farm_id")
 
     if not owner_user_id or not farm_id:
         return Response(
@@ -59,7 +59,7 @@ def get_assets_by_user_and_farm(request):
 @api_view(['GET'])
 def get_assets_by_user(request):
 
-    owner_user_id = request.data.get("user_id")
+    owner_user_id = request.query_params.get("user_id")
 
     if not owner_user_id:
         return Response(
