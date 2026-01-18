@@ -1103,22 +1103,6 @@
                                            style="width: 80px;">
                                 </div>
                                 <div class="filter-group">
-                                    <label class="filter-label">Confidence (%):</label>
-                                    <input type="number" 
-                                           class="filter-input" 
-                                           placeholder="Min" 
-                                           ng-model="records.filterMinConfidence"
-                                           min="0" 
-                                           max="100"
-                                           style="width: 80px;">
-                                    <span>-</span>
-                                    <input type="number" 
-                                           class="filter-input" 
-                                           placeholder="Max" 
-                                           ng-model="records.filterMaxConfidence"
-                                           min="0" 
-                                           max="100"
-                                           style="width: 80px;">
                                 </div>
                             </div>
 
@@ -1141,7 +1125,7 @@
                                                 <th>Resource Type</th>
                                                 <th>Authorization Status</th>
                                                 <th>Anomaly Score</th>
-                                                <th>Confidence</th>
+                                                <th>Reason</th>
                                                 <th>Response Action</th>
                                                 <th>Timestamp</th>
                                                 <th></th>
@@ -1171,9 +1155,15 @@
                                                     </span>
                                                 </td>
                                                 <td>
-                                                    <span class="detail-value score-value">{{record.anomaly_score | number:2}}</span>
+                                                    <span class="anomaly-score" ng-class="{
+                                                        'score-normal': record.anomaly_score < 0.3,
+                                                        'score-suspicious': record.anomaly_score >= 0.3 && record.anomaly_score < 0.7,
+                                                        'score-anomaly': record.anomaly_score >= 0.7
+                                                    }">
+                                                        {{record.anomaly_score | number:2}}
+                                                    </span>
                                                 </td>
-                                                <td>{{record.confidence * 100 | number:0}}%</td>
+                                                <td class="reason-cell">{{record.reasons || 'N/A'}}</td>
                                                 <td>{{record.response_action}}</td>
                                                 <td>{{record.processed_at | date:'short'}}</td>
                                                 <td>
@@ -1181,7 +1171,7 @@
                                                 </td>
                                             </tr>
                                             <tr ng-repeat-end ng-if="records.expandedRow === record.id" class="expanded-row">
-                                                <td colspan="12">
+                                                <td colspan="11">
                                                     <div class="expanded-content">
                                                         <div class="detail-grid" style="padding: 1rem;">
                                                             <div class="detail-item">

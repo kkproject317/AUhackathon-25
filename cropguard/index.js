@@ -7,10 +7,12 @@
     'use strict';
 
     // ============================================
-    // MOCK DATA
+    // MOCK DATA (Based on API responses)
     // ============================================
+    // Set USE_MOCK_DATA to true to use mock data, false to use real API
+    const USE_MOCK_DATA = true;
     
-    // var MOCK_DATA = {
+    var MOCK_DATA = {
     //     user: {
     //         id: 1,
     //         name: 'Nidhi Patel',
@@ -66,8 +68,54 @@
     //         { date: 'Jan 13', count: 1 }, { date: 'Jan 14', count: 2 }, { date: 'Jan 15', count: 1 },
     //         { date: 'Jan 16', count: 1 }, { date: 'Jan 17', count: 1 }, { date: 'Jan 18', count: 3 },
     //         { date: 'Jan 19', count: 2 }, { date: 'Jan 20', count: 5 }
-    //     ]
-    // };
+        // Mock farms data (from /farms/by-user/ API)
+        farms: [
+            { farm_id: 'FARM_001', owner_user_id: 'FARMER_001', farm_name: 'Patel Green Fields', location_lat: 23.0225, location_long: 72.5714, area_in_acres: 12.5, is_active: true },
+            { farm_id: 'FARM_002', owner_user_id: 'FARMER_001', farm_name: 'Sabarmati Agro Farm', location_lat: 23.03, location_long: 72.58, area_in_acres: 8.2, is_active: true },
+            { farm_id: 'FARM_003', owner_user_id: 'FARMER_001', farm_name: 'Gujarat Khedut Farms', location_lat: 23.015, location_long: 72.565, area_in_acres: 14.1, is_active: true }
+        ],
+        // Mock assets/devices data (from /assets/by-user/ API)
+        assets: [
+            // FARM_002 assets
+            { asset_id: 'ASSET_00001', farm_id: 'FARM_002', owner_user_id: 'FARMER_001', asset_type: 'soil_sensor', asset_name: 'Soil Sensor G01', asset_os: 'Embedded Linux', baseline_lat: 23.1101, baseline_long: 72.5901, is_active: true },
+            { asset_id: 'ASSET_00002', farm_id: 'FARM_002', owner_user_id: 'FARMER_001', asset_type: 'soil_sensor', asset_name: 'Soil Sensor G02', asset_os: 'Embedded Linux', baseline_lat: 23.1103, baseline_long: 72.5903, is_active: true },
+            { asset_id: 'ASSET_00003', farm_id: 'FARM_002', owner_user_id: 'FARMER_001', asset_type: 'soil_sensor', asset_name: 'Soil Sensor G03', asset_os: 'Embedded Linux', baseline_lat: 23.1105, baseline_long: 72.5905, is_active: true },
+            { asset_id: 'ASSET_00004', farm_id: 'FARM_002', owner_user_id: 'FARMER_001', asset_type: 'soil_sensor', asset_name: 'Soil Sensor G04', asset_os: 'Embedded Linux', baseline_lat: 23.1107, baseline_long: 72.5907, is_active: true },
+            { asset_id: 'ASSET_00005', farm_id: 'FARM_002', owner_user_id: 'FARMER_001', asset_type: 'irrigation_controller', asset_name: 'Irrigation Controller G01', asset_os: 'RTOS', baseline_lat: 23.1109, baseline_long: 72.5909, is_active: true },
+            { asset_id: 'ASSET_00006', farm_id: 'FARM_002', owner_user_id: 'FARMER_001', asset_type: 'irrigation_controller', asset_name: 'Irrigation Controller G02', asset_os: 'RTOS', baseline_lat: 23.1111, baseline_long: 72.5911, is_active: true },
+            { asset_id: 'ASSET_00007', farm_id: 'FARM_002', owner_user_id: 'FARMER_001', asset_type: 'irrigation_controller', asset_name: 'Irrigation Controller G03', asset_os: 'RTOS', baseline_lat: 23.1113, baseline_long: 72.5913, is_active: true },
+            { asset_id: 'ASSET_00008', farm_id: 'FARM_002', owner_user_id: 'FARMER_001', asset_type: 'gateway', asset_name: 'Farm Gateway G02', asset_os: 'Ubuntu Core', baseline_lat: 23.1117, baseline_long: 72.5917, is_active: true },
+            { asset_id: 'ASSET_00009', farm_id: 'FARM_002', owner_user_id: 'FARMER_001', asset_type: 'gateway', asset_name: 'Farm Gateway G03', asset_os: 'Ubuntu Core', baseline_lat: 23.1119, baseline_long: 72.5919, is_active: true },
+            { asset_id: 'ASSET_00010', farm_id: 'FARM_002', owner_user_id: 'FARMER_001', asset_type: 'weather_station', asset_name: 'Weather Station G01', asset_os: 'FreeRTOS', baseline_lat: 23.1121, baseline_long: 72.5921, is_active: true },
+            { asset_id: 'ASSET_00011', farm_id: 'FARM_002', owner_user_id: 'FARMER_001', asset_type: 'weather_station', asset_name: 'Weather Station G02', asset_os: 'FreeRTOS', baseline_lat: 23.1123, baseline_long: 72.5923, is_active: true },
+            { asset_id: 'ASSET_00012', farm_id: 'FARM_002', owner_user_id: 'FARMER_001', asset_type: 'weather_station', asset_name: 'Weather Station G03', asset_os: 'FreeRTOS', baseline_lat: 23.1125, baseline_long: 72.5925, is_active: true },
+            { asset_id: 'ASSET_00013', farm_id: 'FARM_002', owner_user_id: 'FARMER_001', asset_type: 'soil_sensor', asset_name: 'Soil Sensor G05', asset_os: 'Embedded Linux', baseline_lat: 23.1127, baseline_long: 72.5927, is_active: true },
+            { asset_id: 'ASSET_00014', farm_id: 'FARM_002', owner_user_id: 'FARMER_001', asset_type: 'soil_sensor', asset_name: 'Soil Sensor G06', asset_os: 'Embedded Linux', baseline_lat: 23.1129, baseline_long: 72.5929, is_active: true },
+            { asset_id: 'ASSET_00015', farm_id: 'FARM_002', owner_user_id: 'FARMER_001', asset_type: 'irrigation_controller', asset_name: 'Irrigation Controller G04', asset_os: 'RTOS', baseline_lat: 23.1131, baseline_long: 72.5931, is_active: true },
+            { asset_id: 'ASSET_00016', farm_id: 'FARM_002', owner_user_id: 'FARMER_001', asset_type: 'gateway', asset_name: 'Farm Gateway G04', asset_os: 'Ubuntu Core', baseline_lat: 23.1133, baseline_long: 72.5933, is_active: true },
+            { asset_id: 'ASSET_00017', farm_id: 'FARM_002', owner_user_id: 'FARMER_001', asset_type: 'weather_station', asset_name: 'Weather Station G04', asset_os: 'FreeRTOS', baseline_lat: 23.1135, baseline_long: 72.5935, is_active: true },
+            // FARM_001 assets
+            { asset_id: 'ASSET_00018', farm_id: 'FARM_001', owner_user_id: 'FARMER_001', asset_type: 'soil_sensor', asset_name: 'Soil Sensor A01', asset_os: 'Embedded Linux', baseline_lat: 23.0201, baseline_long: 72.5501, is_active: true },
+            { asset_id: 'ASSET_00019', farm_id: 'FARM_001', owner_user_id: 'FARMER_001', asset_type: 'soil_sensor', asset_name: 'Soil Sensor A02', asset_os: 'Embedded Linux', baseline_lat: 23.0203, baseline_long: 72.5503, is_active: true },
+            { asset_id: 'ASSET_00020', farm_id: 'FARM_001', owner_user_id: 'FARMER_001', asset_type: 'soil_sensor', asset_name: 'Soil Sensor A03', asset_os: 'Embedded Linux', baseline_lat: 23.0205, baseline_long: 72.5505, is_active: true },
+            { asset_id: 'ASSET_00021', farm_id: 'FARM_001', owner_user_id: 'FARMER_001', asset_type: 'soil_sensor', asset_name: 'Soil Sensor A04', asset_os: 'Embedded Linux', baseline_lat: 23.0207, baseline_long: 72.5507, is_active: true },
+            { asset_id: 'ASSET_00022', farm_id: 'FARM_001', owner_user_id: 'FARMER_001', asset_type: 'irrigation_controller', asset_name: 'Irrigation Controller A01', asset_os: 'RTOS', baseline_lat: 23.0209, baseline_long: 72.5509, is_active: true },
+            { asset_id: 'ASSET_00023', farm_id: 'FARM_001', owner_user_id: 'FARMER_001', asset_type: 'irrigation_controller', asset_name: 'Irrigation Controller A02', asset_os: 'RTOS', baseline_lat: 23.0211, baseline_long: 72.5511, is_active: true },
+            { asset_id: 'ASSET_00024', farm_id: 'FARM_001', owner_user_id: 'FARMER_001', asset_type: 'irrigation_controller', asset_name: 'Irrigation Controller A03', asset_os: 'RTOS', baseline_lat: 23.0213, baseline_long: 72.5513, is_active: true },
+            { asset_id: 'ASSET_00025', farm_id: 'FARM_001', owner_user_id: 'FARMER_001', asset_type: 'gateway', asset_name: 'Farm Gateway A01', asset_os: 'Ubuntu Core', baseline_lat: 23.0215, baseline_long: 72.5515, is_active: true },
+            { asset_id: 'ASSET_00026', farm_id: 'FARM_001', owner_user_id: 'FARMER_001', asset_type: 'gateway', asset_name: 'Farm Gateway A02', asset_os: 'Ubuntu Core', baseline_lat: 23.0217, baseline_long: 72.5517, is_active: true },
+            { asset_id: 'ASSET_00027', farm_id: 'FARM_001', owner_user_id: 'FARMER_001', asset_type: 'gateway', asset_name: 'Farm Gateway A03', asset_os: 'Ubuntu Core', baseline_lat: 23.0219, baseline_long: 72.5519, is_active: true },
+            { asset_id: 'ASSET_00028', farm_id: 'FARM_001', owner_user_id: 'FARMER_001', asset_type: 'weather_station', asset_name: 'Weather Station A01', asset_os: 'FreeRTOS', baseline_lat: 23.0221, baseline_long: 72.5521, is_active: true },
+            { asset_id: 'ASSET_00029', farm_id: 'FARM_001', owner_user_id: 'FARMER_001', asset_type: 'weather_station', asset_name: 'Weather Station A02', asset_os: 'FreeRTOS', baseline_lat: 23.0223, baseline_long: 72.5523, is_active: true },
+            { asset_id: 'ASSET_00030', farm_id: 'FARM_001', owner_user_id: 'FARMER_001', asset_type: 'weather_station', asset_name: 'Weather Station A03', asset_os: 'FreeRTOS', baseline_lat: 23.0225, baseline_long: 72.5525, is_active: true },
+            { asset_id: 'ASSET_00031', farm_id: 'FARM_001', owner_user_id: 'FARMER_001', asset_type: 'soil_sensor', asset_name: 'Soil Sensor A05', asset_os: 'Embedded Linux', baseline_lat: 23.0227, baseline_long: 72.5527, is_active: true },
+            { asset_id: 'ASSET_00032', farm_id: 'FARM_001', owner_user_id: 'FARMER_001', asset_type: 'soil_sensor', asset_name: 'Soil Sensor A06', asset_os: 'Embedded Linux', baseline_lat: 23.0229, baseline_long: 72.5529, is_active: true },
+            { asset_id: 'ASSET_00033', farm_id: 'FARM_001', owner_user_id: 'FARMER_001', asset_type: 'irrigation_controller', asset_name: 'Irrigation Controller A04', asset_os: 'RTOS', baseline_lat: 23.0231, baseline_long: 72.5531, is_active: true },
+            { asset_id: 'ASSET_00034', farm_id: 'FARM_001', owner_user_id: 'FARMER_001', asset_type: 'gateway', asset_name: 'Farm Gateway A04', asset_os: 'Ubuntu Core', baseline_lat: 23.0233, baseline_long: 72.5533, is_active: true },
+            { asset_id: 'ASSET_00035', farm_id: 'FARM_001', owner_user_id: 'FARMER_001', asset_type: 'weather_station', asset_name: 'Weather Station A04', asset_os: 'FreeRTOS', baseline_lat: 23.0235, baseline_long: 72.5535, is_active: true },
+            { asset_id: 'ASSET_00036', farm_id: 'FARM_001', owner_user_id: 'FARMER_001', asset_type: 'weather_station', asset_name: 'Weather Station A04', asset_os: 'FreeRTOS', baseline_lat: 23.0235, baseline_long: 72.5535, is_active: true }
+        ]
+    };
 
     // ============================================
     // MODULE DEFINITION & CONFIG
@@ -212,25 +260,44 @@
 // ============================================
 
 angular.module('cropGuardApp')
-.factory('AuthService', ['$q', function ($q) {
+.factory('AuthService', ['$q', '$window', function ($q, $window) {
 
     let currentUser = null;
+    
+    // Check localStorage on initialization to restore session
+    var storedUser = $window.localStorage.getItem('cropGuardUser');
+    if (storedUser) {
+        try {
+            currentUser = JSON.parse(storedUser);
+        } catch (e) {
+            $window.localStorage.removeItem('cropGuardUser');
+            currentUser = null;
+        }
+    }
 
     return {
-        login: function () {
-            currentUser = {
-                id: 'FARMER_001',
-                name: 'Farmer Demo',
-                email: 'farmer@demo.com',
-                role: 'Farmer',
-                created_at: new Date()
-            };
-            return $q.resolve(currentUser);
+        login: function (email, password) {
+            // Validate credentials
+            if (email === 'nidhipatel2005@gmail.com' && password === 'nidhi12345') {
+                currentUser = {
+                    id: 'FARMER_001',
+                    name: 'Nidhi Patel',
+                    email: email,
+                    role: 'Farmer',
+                    created_at: new Date().toISOString()
+                };
+                // Save to localStorage
+                $window.localStorage.setItem('cropGuardUser', JSON.stringify(currentUser));
+                return $q.resolve(currentUser);
+            }
+            return $q.reject({ message: 'Invalid email or password' });
         },
         
 
         logout: function () {
             currentUser = null;
+            // Clear localStorage
+            $window.localStorage.removeItem('cropGuardUser');
         },
 
         isAuthenticated: function () {
@@ -267,12 +334,14 @@ angular.module('cropGuardApp')
     }
 
     function mapDevice(a) {
+        // Find farm name from farms data
+        var farm = MOCK_DATA.farms.find(f => f.farm_id === a.farm_id);
         return {
             id: a.asset_id,
             name: a.asset_name,
             type: normalizeType(a.asset_type),
             farm_id: a.farm_id,
-            farm_name: a.farm_id, // UI expects string, OK for now
+            farm_name: farm ? farm.farm_name : a.farm_id,
             os: a.asset_os,
             is_active: a.is_active,
             baseline_lat: a.baseline_lat,
@@ -297,9 +366,15 @@ angular.module('cropGuardApp')
 
         // ================= FARMS =================
         getFarms: function () {
-            return $http.post(`${BASE_URL}/farms/by-user/`, {
-                user_id: USER_ID
-            }).then(res => res.data.farms.map(mapFarm));
+            if (USE_MOCK_DATA) {
+                // Use mock data
+                return $q.resolve(MOCK_DATA.farms.map(mapFarm));
+            } else {
+                // Use real API
+                return $http.post(`${BASE_URL}/farms/by-user/`, {
+                    user_id: USER_ID
+                }).then(res => res.data.farms.map(mapFarm));
+            }
         },
 
         getFarm: function (id) {
@@ -310,9 +385,15 @@ angular.module('cropGuardApp')
 
         // ================= DEVICES =================
         getDevices: function () {
-            return $http.post(`${BASE_URL}/assets/by-user/`, {
-                user_id: USER_ID
-            }).then(res => res.data.assets.map(mapDevice));
+            if (USE_MOCK_DATA) {
+                // Use mock data
+                return $q.resolve(MOCK_DATA.assets.map(mapDevice));
+            } else {
+                // Use real API
+                return $http.post(`${BASE_URL}/assets/by-user/`, {
+                    user_id: USER_ID
+                }).then(res => res.data.assets.map(mapDevice));
+            }
         },
 
         getDevice: function (id) {
@@ -322,23 +403,73 @@ angular.module('cropGuardApp')
         },
 
         getDevicesByFarm: function (farmId) {
-            return $http.post(`${BASE_URL}/assets/by-user-farm/`, {
-                user_id: USER_ID,
-                farm_id: farmId
-            }).then(res => res.data.assets.map(mapDevice));
+            if (USE_MOCK_DATA) {
+                // Use mock data - filter by farm_id
+                return $q.resolve(MOCK_DATA.assets
+                    .filter(a => a.farm_id === farmId)
+                    .map(mapDevice));
+            } else {
+                // Use real API
+                return $http.post(`${BASE_URL}/assets/by-user-farm/`, {
+                    user_id: USER_ID,
+                    farm_id: farmId
+                }).then(res => res.data.assets.map(mapDevice));
+            }
         },
 
         // ================= RECORDS =================
-        // backend not ready → keep mock-compatible empty
         getRecords: function () {
             return $q.resolve([]);
         },
 
         // ================= ANALYTICS HELPERS =================
-        getDevicesData: () => $q.resolve([]),
-        getPredictionDistribution: () => $q.resolve({ normal: 0, suspicious: 0, anomaly: 0 }),
+        getDevicesData: function() {
+            if (USE_MOCK_DATA) {
+                // Mock data for devices over time chart
+                var mockDevicesData = [
+                    { date: 'Jan 10', active: 2, inactive: 0 },
+                    { date: 'Jan 11', active: 3, inactive: 0 },
+                    { date: 'Jan 12', active: 4, inactive: 0 },
+                    { date: 'Jan 13', active: 5, inactive: 0 },
+                    { date: 'Jan 14', active: 6, inactive: 1 },
+                    { date: 'Jan 15', active: 6, inactive: 1 },
+                    { date: 'Jan 16', active: 7, inactive: 1 },
+                    { date: 'Jan 17', active: 8, inactive: 1 },
+                    { date: 'Jan 18', active: 7, inactive: 3 },
+                    { date: 'Jan 19', active: 7, inactive: 3 },
+                    { date: 'Jan 20', active: 36, inactive: 0 }
+                ];
+                return $q.resolve(mockDevicesData);
+            }
+            return $q.resolve([]);
+        },
+        getPredictionDistribution: function() {
+            if (USE_MOCK_DATA) {
+                // Mock data for prediction distribution
+                return $q.resolve({ normal: 30, suspicious: 4, anomaly: 2 });
+            }
+            return $q.resolve({ normal: 0, suspicious: 0, anomaly: 0 });
+        },
         getRecordsData: () => $q.resolve([]),
-        getRecordsTimelineData: () => $q.resolve([]),
+        getRecordsTimelineData: function() {
+            if (USE_MOCK_DATA) {
+                // Mock data for records anomaly score chart
+                var mockRecordsData = [
+                    { event: 'EVT-001', score: 0.12, prediction: 'Normal' },
+                    { event: 'EVT-002', score: 0.08, prediction: 'Normal' },
+                    { event: 'EVT-003', score: 0.45, prediction: 'Suspicious' },
+                    { event: 'EVT-004', score: 0.15, prediction: 'Normal' },
+                    { event: 'EVT-005', score: 0.78, prediction: 'Anomaly' },
+                    { event: 'EVT-006', score: 0.85, prediction: 'Anomaly' },
+                    { event: 'EVT-007', score: 0.10, prediction: 'Normal' },
+                    { event: 'EVT-008', score: 0.52, prediction: 'Suspicious' },
+                    { event: 'EVT-009', score: 0.91, prediction: 'Anomaly' },
+                    { event: 'EVT-010', score: 0.48, prediction: 'Suspicious' }
+                ];
+                return $q.resolve(mockRecordsData);
+            }
+            return $q.resolve([]);
+        },
         getRecordsByDeviceType: () => $q.resolve({}),
         getResponseActionsData: () => $q.resolve({}),
         getAnomalyScoreByFarm: () => $q.resolve([]),
@@ -480,6 +611,7 @@ angular.module('cropGuardApp')
 
             vm.login = function() {
                 vm.error = '';
+                if (!vm.email || !vm.password) { vm.error = 'Please enter both email and password'; return; }
                 vm.isLoading = true;
 
                 // Collect all required data for API payload
@@ -493,9 +625,10 @@ angular.module('cropGuardApp')
                         var ipAddress = results[0];
                         var geoLocation = results[1];
                         
-                        // Create payload
+                        // Create payload (for testing - no API call)
                         var payload = {
-                            userID: 'FARMER_001',
+                            userID: vm.email,
+                            password: vm.password,
                             timestamp: timestamp,
                             ipAddress: ipAddress,
                             longitude: geoLocation.longitude,
@@ -504,32 +637,11 @@ angular.module('cropGuardApp')
                             deviceType: deviceType
                         };
                         
+                        // Log payload to console
                         console.log('Login Payload:', payload);
                         
-                        // Send to API (commented out for testing)
-                        // $http.post('/api/login', payload)
-                        //     .then(function(response) {
-                        //         console.log('API Response:', response.data);
-                        //         // Continue with authentication after API call
-                        //         return AuthService.login();
-                        //     })
-                        //     .catch(function(error) {
-                        //         console.error('API Error:', error);
-                        //         // Even if API fails, continue with local authentication
-                        //         return AuthService.login();
-                        //     })
-                        //     .then(function() { 
-                        //         $location.path('/dashboard/home'); 
-                        //     })
-                        //     .catch(function(error) { 
-                        //         vm.error = error.message || 'Invalid credentials'; 
-                        //     })
-                        //     .finally(function() { 
-                        //         vm.isLoading = false; 
-                        //     });
-                        
-                        // Continue with authentication (without API call for now)
-                        AuthService.login()
+                        // Continue with authentication (API call removed for now)
+                        AuthService.login(vm.email, vm.password)
                             .then(function() { 
                                 $location.path('/dashboard/home'); 
                             })
@@ -543,7 +655,7 @@ angular.module('cropGuardApp')
                     .catch(function(error) {
                         console.error('Error collecting login data:', error);
                         // If data collection fails, still try to authenticate
-                        AuthService.login()
+                        AuthService.login(vm.email, vm.password)
                             .then(function() { $location.path('/dashboard/home'); })
                             .catch(function(err) { vm.error = err.message || 'Invalid credentials'; })
                             .finally(function() { vm.isLoading = false; });
@@ -1032,11 +1144,9 @@ angular.module('cropGuardApp')
             vm.filterPrediction = '';
             vm.filterMinScore = '';
             vm.filterMaxScore = '';
-            vm.filterMinConfidence = '';
-            vm.filterMaxConfidence = '';
 
             vm.toggleRow = function(recordId) { vm.expandedRow = vm.expandedRow === recordId ? null : recordId; };
-            vm.clearFilters = function() { vm.filterPrediction = ''; vm.filterMinScore = ''; vm.filterMaxScore = ''; vm.filterMinConfidence = ''; vm.filterMaxConfidence = ''; };
+            vm.clearFilters = function() { vm.filterPrediction = ''; vm.filterMinScore = ''; vm.filterMaxScore = ''; };
             vm.getPredictionClass = function(prediction) {
                 switch (prediction) { case 'Normal': return 'badge-normal'; case 'Suspicious': return 'badge-suspicious'; case 'Anomaly': return 'badge-anomaly'; default: return ''; }
             };
@@ -1045,8 +1155,6 @@ angular.module('cropGuardApp')
                 if (vm.filterPrediction) { result = result.filter(function(r) { return r.prediction === vm.filterPrediction; }); }
                 if (vm.filterMinScore !== '' && vm.filterMinScore !== null) { var minScore = parseFloat(vm.filterMinScore); result = result.filter(function(r) { return r.anomaly_score >= minScore; }); }
                 if (vm.filterMaxScore !== '' && vm.filterMaxScore !== null) { var maxScore = parseFloat(vm.filterMaxScore); result = result.filter(function(r) { return r.anomaly_score <= maxScore; }); }
-                if (vm.filterMinConfidence !== '' && vm.filterMinConfidence !== null) { var minConf = parseFloat(vm.filterMinConfidence) / 100; result = result.filter(function(r) { return r.confidence >= minConf; }); }
-                if (vm.filterMaxConfidence !== '' && vm.filterMaxConfidence !== null) { var maxConf = parseFloat(vm.filterMaxConfidence) / 100; result = result.filter(function(r) { return r.confidence <= maxConf; }); }
                 return result;
             };
 

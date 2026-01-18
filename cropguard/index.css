@@ -90,7 +90,7 @@
     --transition-slow: 0.4s ease;
     
     /* Layout */
-    --sidebar-width: 260px;
+    --sidebar-width: 220px;
     --sidebar-collapsed: 70px;
     --navbar-height: 70px;
     --right-sidebar-width: 400px;
@@ -115,6 +115,15 @@ body {
     line-height: 1.6;
     min-height: 100vh;
     overflow-x: hidden;
+    position: relative;
+}
+
+/* Constrain to 1440px only when viewport is larger */
+@media (min-width: 1441px) {
+    body {
+        max-width: 1440px;
+        margin: 0 auto;
+    }
 }
 
 /* Background Pattern */
@@ -567,6 +576,8 @@ a:hover {
 .dashboard-layout {
     display: flex;
     min-height: 100vh;
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
 /* Left Sidebar */
@@ -770,14 +781,21 @@ a:hover {
     flex: 1;
     margin-left: var(--sidebar-width);
     transition: margin var(--transition-normal);
+    max-width: calc(1440px - var(--sidebar-width));
+    width: calc(100% - var(--sidebar-width));
+    overflow-x: hidden;
 }
 
 .sidebar.collapsed ~ .main-content {
     margin-left: var(--sidebar-collapsed);
+    max-width: calc(1440px - var(--sidebar-collapsed));
+    width: calc(100% - var(--sidebar-collapsed));
 }
 
 .main-content.map-open {
     margin-right: var(--right-sidebar-width);
+    max-width: calc(1440px - var(--sidebar-width) - var(--right-sidebar-width));
+    width: calc(100% - var(--sidebar-width) - var(--right-sidebar-width));
 }
 
 /* Top Navbar */
@@ -938,6 +956,9 @@ a:hover {
     padding: var(--spacing-xl);
     background: var(--content-bg);
     min-height: calc(100vh - var(--navbar-height));
+    max-width: 100%;
+    overflow-x: hidden;
+    box-sizing: border-box;
     color: var(--text-primary);
     color: var(--text-dark);
 }
@@ -999,6 +1020,8 @@ a:hover {
     grid-template-columns: 1fr 1fr;
     gap: var(--spacing-xl);
     margin-bottom: var(--spacing-xl);
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
 @media (max-width: 1024px) {
@@ -1349,6 +1372,9 @@ a:hover {
     cursor: pointer;
     transition: all var(--transition-normal);
     box-shadow: var(--shadow-sm);
+    max-width: 100%;
+    overflow-x: hidden;
+    box-sizing: border-box;
 }
 
 .device-locations-tile:hover {
@@ -1364,6 +1390,8 @@ a:hover {
     margin-bottom: var(--spacing-lg);
     padding-bottom: var(--spacing-md);
     border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
 }
 
 .device-locations-tile-header h4 {
@@ -1373,6 +1401,10 @@ a:hover {
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
+    font-size: 1rem;
+    flex: 1;
+    min-width: 0;
+    word-wrap: break-word;
 }
 
 .device-locations-tile-header h4 i {
@@ -1385,27 +1417,42 @@ a:hover {
     display: flex;
     align-items: center;
     gap: var(--spacing-xs);
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .device-locations-tile-content {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-lg);
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
 /* Device Status Cards */
 .device-status-cards {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: var(--spacing-md);
+    gap: var(--spacing-sm);
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+@media (max-width: 1440px) {
+    .device-status-cards {
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--spacing-xs);
+    }
 }
 
 .device-status-card {
     text-align: center;
-    padding: var(--spacing-md);
+    padding: var(--spacing-sm) var(--spacing-xs);
     background: var(--card-inner);
     border-radius: var(--radius-md);
     transition: all var(--transition-fast);
+    min-width: 0;
+    box-sizing: border-box;
 }
 
 .device-status-card:hover {
@@ -1413,14 +1460,14 @@ a:hover {
 }
 
 .device-status-icon {
-    width: 48px;
-    height: 48px;
+    width: 40px;
+    height: 40px;
     border-radius: var(--radius-md);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.25rem;
-    margin: 0 auto var(--spacing-sm);
+    font-size: 1.1rem;
+    margin: 0 auto var(--spacing-xs);
 }
 
 .device-status-card.normal .device-status-icon {
@@ -1440,16 +1487,18 @@ a:hover {
 
 .device-status-value {
     font-family: var(--font-display);
-    font-size: 1.75rem;
+    font-size: 1.5rem;
     font-weight: 700;
     color: var(--text-dark);
-    line-height: 1;
+    line-height: 1.2;
     margin-bottom: var(--spacing-xs);
 }
 
 .device-status-label {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     color: var(--text-dark-secondary);
+    word-wrap: break-word;
+    line-height: 1.2;
 }
 
 /* Top Locations Section */
@@ -1485,6 +1534,15 @@ a:hover {
     padding: var(--spacing-xs) 0;
     font-size: 0.9rem;
     color: var(--text-dark-secondary);
+    min-width: 0;
+    word-wrap: break-word;
+}
+
+.top-location-item span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
 }
 
 .top-location-item i {
@@ -1503,6 +1561,8 @@ a:hover {
     grid-template-columns: repeat(4, 1fr);
     gap: var(--spacing-lg);
     margin-bottom: var(--spacing-xl);
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
 .stat-card {
@@ -1575,25 +1635,31 @@ a:hover {
    TABLES (Dark Green Theme)
    ============================================ */
 .table-container {
-    overflow-x: auto;
+    overflow-x: hidden;
+    max-width: 100%;
 }
 
 .data-table {
     width: 100%;
     border-collapse: collapse;
+    table-layout: fixed;
 }
 
 .data-table th,
 .data-table td {
-    padding: var(--spacing-md) var(--spacing-lg);
+    padding: var(--spacing-sm) var(--spacing-md);
     text-align: left;
     border-bottom: 1px solid var(--border-content);
+    word-wrap: break-word;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.85rem;
 }
 
 .data-table th {
     font-family: var(--font-display);
     font-weight: 600;
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: var(--text-dark-secondary);
@@ -1638,6 +1704,45 @@ a:hover {
 .data-table td {
     color: var(--text-dark);
 }
+
+/* Reason column styling */
+.data-table .reason-cell {
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Anomaly score styling */
+.data-table .anomaly-score {
+    font-weight: 600;
+}
+
+.data-table .anomaly-score.score-normal {
+    color: var(--status-normal);
+}
+
+.data-table .anomaly-score.score-suspicious {
+    color: var(--status-suspicious);
+}
+
+.data-table .anomaly-score.score-anomaly {
+    color: var(--status-anomaly);
+}
+
+/* Adjust column widths for better fit - prevent horizontal scroll */
+.data-table th:nth-child(1), .data-table td:nth-child(1) { width: 10%; } /* Event ID */
+.data-table th:nth-child(2), .data-table td:nth-child(2) { width: 12%; } /* Device */
+.data-table th:nth-child(3), .data-table td:nth-child(3) { width: 8%; } /* Prediction */
+.data-table th:nth-child(4), .data-table td:nth-child(4) { width: 10%; } /* Asset Type */
+.data-table th:nth-child(5), .data-table td:nth-child(5) { width: 8%; } /* Action Type */
+.data-table th:nth-child(6), .data-table td:nth-child(6) { width: 10%; } /* Resource Type */
+.data-table th:nth-child(7), .data-table td:nth-child(7) { width: 10%; } /* Auth Status */
+.data-table th:nth-child(8), .data-table td:nth-child(8) { width: 8%; } /* Anomaly Score */
+.data-table th:nth-child(9), .data-table td:nth-child(9) { width: 15%; } /* Reason */
+.data-table th:nth-child(10), .data-table td:nth-child(10) { width: 10%; } /* Response Action */
+.data-table th:nth-child(11), .data-table td:nth-child(11) { width: 10%; } /* Timestamp */
+.data-table th:nth-child(12), .data-table td:nth-child(12) { width: 3%; } /* Expand icon */
 
 /* Status Badges */
 .status-badge {
@@ -1701,8 +1806,10 @@ a:hover {
 /* Cards Grid View */
 .cards-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: var(--spacing-lg);
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
 .farm-card,
@@ -4502,6 +4609,40 @@ html {
     
     .stats-tile-content {
         grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Ensure everything fits within 1440px */
+@media (max-width: 1440px) {
+    body {
+        max-width: 100%;
+    }
+    
+    .main-content {
+        max-width: calc(100% - var(--sidebar-width));
+        width: calc(100% - var(--sidebar-width));
+    }
+    
+    .sidebar.collapsed ~ .main-content {
+        max-width: calc(100% - var(--sidebar-collapsed));
+        width: calc(100% - var(--sidebar-collapsed));
+    }
+    
+    .main-content.map-open {
+        max-width: calc(100% - var(--sidebar-width) - var(--right-sidebar-width));
+        width: calc(100% - var(--sidebar-width) - var(--right-sidebar-width));
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+    
+    .cards-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    }
+    
+    .page-content {
+        padding: var(--spacing-lg);
     }
 }
 
