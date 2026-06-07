@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="loginApp">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Agriculture Dashboard</title>
+    <link rel="stylesheet" href="login.css">
+    <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <script src="app.js"></script>
+</head>
+<body ng-controller="LoginController">
+    <div class="login-container">
+        <div class="login-box">
+            <div class="logo-section">
+                <svg width="80" height="80" viewBox="0 0 80 80" class="logo">
+                    <circle cx="40" cy="40" r="38" fill="#047857" opacity="0.2"/>
+                    <path d="M40 15 C40 15, 33 22, 33 32 C33 38, 36 41, 40 41 C44 41, 47 38, 47 32 C47 22, 40 15, 40 15 Z" fill="#10b981"/>
+                    <path d="M28 30 C28 30, 21 35, 21 42 C21 47, 24 50, 28 50 C32 50, 35 47, 35 42 C35 35, 28 30, 28 30 Z" fill="#059669"/>
+                    <path d="M52 30 C52 30, 59 35, 59 42 C59 47, 56 50, 52 50 C48 50, 45 47, 45 42 C45 35, 52 30, 52 30 Z" fill="#059669"/>
+                    <rect x="37" y="48" width="6" height="20" fill="#047857"/>
+                </svg>
+                <h1>CropGuard</h1>
+                <p>Secure Login Portal</p>
+            </div>
+
+           
+
+            <form ng-submit="handleLogin($event)">
+                <div class="form-group">
+                    <label>User Name:</label>
+                    <input 
+                        type="text" 
+                        name="userId" 
+                        ng-model="formData.userId" 
+                        placeholder="Enter your username"
+                        required>
+                </div>
+
+                <div class="form-group">
+                    <label>Password:</label>
+                    <input 
+                        type="password" 
+                        name="password" 
+                        ng-model="formData.password" 
+                        placeholder="Enter your password"
+                        required>
+                </div>
+
+                <button type="submit" class="login-btn" ng-disabled="loading">
+                    <span ng-if="!loading">Log In</span>
+                    <span ng-if="loading">
+                    
+                    </span>
+                </button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
